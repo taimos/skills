@@ -9,6 +9,7 @@ Works with Claude Code, Cursor, Codex, GitHub Copilot, OpenCode, Kiro, and any o
 | Skill | Description |
 |-------|-------------|
 | [cdk-review](skills/cdk-review/SKILL.md) | Review AWS CDK projects against proven best practices and generate a structured `REVIEW.md` report with severity-classified findings. |
+| [cognito-managed-login-branding](skills/cognito-managed-login-branding/SKILL.md) | Create, validate, and fix Amazon Cognito Managed Login branding assets (logos/favicons), catching the server-enforced rules `CfnManagedLoginBranding` fails on before `cdk deploy`. |
 
 ## Installation
 
