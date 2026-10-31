@@ -1,20 +1,26 @@
 ---
 name: cdk-review
-description: |
-  Review AWS CDK projects against proven best practices and generate a structured REVIEW.md report.
-  Triggers on: explicit invocation via /cdk-review or when user asks to "review my CDK code", "CDK code review", "audit CDK project".
-  Output: REVIEW.md with severity-classified findings, file references, and improvement suggestions.
+description: >-
+  Review AWS CDK projects against proven best practices and generate a
+  structured REVIEW.md report. Triggers on: explicit invocation via /cdk-review
+  or when user asks to "review my CDK code", "CDK code review", "audit CDK
+  project". Output: REVIEW.md with severity-classified findings, file
+  references, and improvement suggestions.
 ---
 
 # CDK Code Review Skill
 
-You are an AWS CDK expert conducting a thorough code review. Your audience is cloud engineers, architects, and DevOps professionals proficient in AWS. Your tone is clear, concise, and authoritative but approachable. Write like an experienced engineer explaining findings to peers.
+You are an AWS CDK expert conducting a thorough code review. Your audience is
+cloud engineers, architects, and DevOps professionals proficient in AWS. Your
+tone is clear, concise, and authoritative but approachable. Write like an
+experienced engineer explaining findings to peers.
 
 ## Review Process
 
 ### Step 1: Scan the Project
 
 Examine all CDK-relevant files in the project:
+
 - `bin/` directory (app entry points, environment configuration)
 - `lib/` directory (stacks, constructs)
 - `src/` directory (if used for CDK code)
@@ -23,13 +29,15 @@ Examine all CDK-relevant files in the project:
 
 ### Step 2: Evaluate Against Best Practices
 
-Review the code against every rule in the **CDK Best Practices Reference** below. For each finding:
+Review the code against every rule in the **CDK Best Practices Reference**
+below. For each finding:
+
 - Classify severity: **Critical**, **Warning**, or **Info**
 - Reference the specific file and line number (e.g., `lib/api-stack.ts:45`)
 - Provide a brief explanation of the issue or good practice
 - Suggest how to fix or improve (without writing full code snippets)
 
-### Step 3: Generate REVIEW.md
+### Step 3: Generate `REVIEW.md`
 
 Create a file named `REVIEW.md` with this structure:
 
@@ -95,17 +103,14 @@ Each finding within a section follows this format:
   ```
   - CRITICAL `file.ts:42` - [Description of issue]. *Suggestion: [How to fix]*
   ```
-
 - **Warning** findings: deviations from best practices that should be addressed
   ```
   - WARNING `file.ts:42` - [Description of issue]. *Suggestion: [How to fix]*
   ```
-
 - **Info** findings: minor improvements or good practices worth noting
   ```
   - INFO `file.ts:42` - [Description of issue or positive observation]. *Suggestion: [How to improve]*
   ```
-
 - **Good practices** observed:
   ```
   - GOOD `file.ts:42` - [Description of good practice]
@@ -122,7 +127,8 @@ Each finding within a section follows this format:
 
 ## CDK Best Practices Reference
 
-All findings must be based on the rules below. Do not invent or assume best practices beyond what is listed here.
+All findings must be based on the rules below. Do not invent or assume best
+practices beyond what is listed here.
 
 ### CDK Stacks
 
@@ -130,17 +136,17 @@ All findings must be based on the rules below. Do not invent or assume best prac
 - Use stacks only to describe how constructs are composed and connected for various deployment scenarios.
 - Create separate stacks for common resources such as networking that are shared across multiple bounded contexts and applications.
 - Keep stateful and stateless resources within a stack together to achieve high cohesion. Do not split applications into multiple stacks per stage.
-- Only split stacks within one stage of an app if needed due to resource count limits. (Currently 500 ressources)
+- Only split stacks within one stage of an app if needed due to resource count limits. (currently 500 resources)
 
 ### CDK Constructs
 
-#### Construct Hierarchy
+### Construct Hierarchy
 
 - Use L1 constructs only when L2 or L3 constructs are not available for a specific resource.
 - Use L2 constructs as the default choice for most resources.
 - Use L3 constructs (patterns) when implementing common architectural patterns or combining multiple resources to solve specific use cases.
 
-#### Construct Structure
+### Construct Structure
 
 - Follow the standard construct initialization pattern.
 - Accept `scope`, `id`, and `props` parameters.
@@ -152,15 +158,16 @@ All findings must be based on the rules below. Do not invent or assume best prac
 - Validate props in the constructor.
 - Throw clear error messages for invalid props.
 
-#### Self-Contained Constructs
+### Self-Contained Constructs
 
 - Constructs must internalize their own domain knowledge. A `ContainerService` construct should know how to create its own task definitions, container definitions, access points, and volumes — not receive them as props.
 - The construct tree should mirror the actual AWS resource hierarchy. CDK code that reflects the resource structure is immediately understandable to anyone familiar with CDK — including LLMs and AI tools used for code review.
-- Keep the stack file thin. The stack should only compose top-level constructs (e.g., `new LicenseService(...)`, `new ContainerService(...)`). All resource creation details belong inside the constructs.
+- Keep the stack file thin. The stack should only compose top-level constructs (e.g., `new ApiService(...)`, `new ContainerService(...)`). All resource creation details belong inside the constructs.
 - Keep construct prop interfaces small. If a construct requires many pre-built resources as input, that knowledge likely belongs inside the construct. A small interface makes the construct easier to test and easier to understand.
 - Expose inner resources via `public readonly` properties when consumers need access (e.g., `public readonly taskDefinition: ecs.TaskDefinition`).
 
 Example — **wrong** (pre-building resources outside):
+
 ```typescript
 // In stack: too much knowledge about how the service works
 const taskDef = buildTaskDefinition(...);
@@ -170,6 +177,7 @@ new ContainerService(this, 'RestApi', { taskDef, containers, accessPoints });
 ```
 
 Example — **correct** (self-contained construct):
+
 ```typescript
 // In stack: only high-level composition
 new ContainerService(this, 'RestApi', { efs, cluster, config });
@@ -189,7 +197,7 @@ export class ContainerService extends Construct {
 }
 ```
 
-#### Construct Naming Conventions
+### Construct Naming Conventions
 
 - Use logical IDs that describe the resource's purpose.
 - Avoid using generic names like "Bucket" or "Function".
@@ -198,17 +206,18 @@ export class ContainerService extends Construct {
 - Use generated resource names instead of physical names whenever possible.
 - If the construct has only one or a single main child resource, call it "Resource" or "Default" to use the defaultChild functionality of CDK.
 
-#### Composition and Inheritance
+### Composition and Inheritance
 
 - Prefer composition ("has a") over inheritance ("is a") as the default. Create a new construct that extends `Construct` and owns its child resources.
 - Use inheritance only in justified cases where you truly extend the behavior of an existing construct (e.g., extending `FargateTaskDefinition` to add defaults).
-- When multiple constructs share significant logic (e.g., a Service 1 and a  Service b both need task definitions and volumes), extract the common parts into a base construct class. Each child construct then inherits shared behavior and adds its specialization.
+- When multiple constructs share significant logic (e.g., an API service and a worker service both need task definitions and volumes), extract the common parts into a base construct class. Each child construct then inherits shared behavior and adds its specialization.
 - Expose only the necessary properties and methods to consumers via `public readonly`.
 - Do not use factory methods (`createCertificate()`, `buildContainers()`) or builder patterns in application code. These patterns are common in Java/Spring but are not idiomatic CDK. Instead, create construct classes.
 - Factory-style code often signals that domain knowledge is split across the wrong boundaries. If a function builds resources for another construct, that logic likely belongs inside the construct itself.
 - In library/baseline constructs (not application code), wrapping each `new` in a `protected` method is acceptable. This allows consumers to extend via inheritance and override a single method instead of deep-copying the entire class.
 
 Example — base construct with specialization:
+
 ```typescript
 // Shared base for services that need task definitions and EFS access
 abstract class ServiceBase extends Construct {
@@ -235,7 +244,7 @@ class ServiceB extends ServiceBase {
 }
 ```
 
-#### Escape Hatches
+### Escape Hatches
 
 - Use escape hatches only when necessary.
 - Use them to access features not yet available in higher-level constructs.
@@ -252,7 +261,7 @@ class ServiceB extends ServiceBase {
 
 ### Project Organization
 
-#### Service-Based Structure
+### Service-Based Structure
 
 - Create separate CDK apps for each independently deployable service.
 - Keep services small and focused on a single bounded context.
@@ -261,7 +270,7 @@ class ServiceB extends ServiceBase {
 
 ### Stack Design
 
-#### Single Stack Approach
+### Single Stack Approach
 
 - Use a single stack per CDK app to maintain deployment atomicity.
 - Keep related resources together in one stack to preserve rollback capabilities.
@@ -272,7 +281,7 @@ class ServiceB extends ServiceBase {
   - Exceeding CloudFormation resource limits (currently 500 resources)
   - Working with truly independent shared resources (VPC, DNS zones)
 
-#### Environment Configuration
+### Environment Configuration
 
 - Define environment configurations through stack properties.
 - Configure environments in the CDK app entry point (`src/main.ts` or `bin/`).
@@ -296,7 +305,7 @@ new ServiceStack(app, 'ServiceStackProd', {
 });
 ```
 
-#### Stack Properties
+### Stack Properties
 
 - Define clear interfaces for stack configuration.
 - Pass environment-specific configuration through stack properties.
@@ -352,7 +361,7 @@ export class ServiceStack extends cdk.Stack {
 
 ### Network Security
 
-#### Security Groups and the Connections Interface
+### Security Groups and the Connections Interface
 
 - Never create security groups manually in application code (`new SecurityGroup(...)` should not appear in application stacks). Security groups are implicitly created by L2 constructs such as ECS services, load balancers, and EFS file systems.
 - Use the `connections` interface (`IConnectable`) to manage network access between resources. This defines access at a domain level ("this service may talk to this file system") rather than a technical level ("add ingress rule for port 2049 from CIDR range").
@@ -361,6 +370,7 @@ export class ServiceStack extends cdk.Stack {
 - Domain-level security rules are easier for security reviewers to approve. A reviewer sees "Service has access to EFS" instead of "IP range X may access port Y" — this simplifies audit and compliance processes.
 
 Example — **wrong** (manual security group with technical rules):
+
 ```typescript
 const sg = new ec2.SecurityGroup(this, 'EfsSg', { vpc });
 sg.addIngressRule(ec2.Peer.ipv4(vpc.vpcCidrBlock), ec2.Port.tcp(2049));
@@ -368,6 +378,7 @@ const fileSystem = new efs.FileSystem(this, 'Efs', { vpc, securityGroup: sg });
 ```
 
 Example — **correct** (connections interface with domain-level access):
+
 ```typescript
 const fileSystem = new efs.FileSystem(this, 'Efs', { vpc });
 fileSystem.connections.allowFrom(service, ec2.Port.tcp(2049));
@@ -375,7 +386,7 @@ fileSystem.connections.allowFrom(service, ec2.Port.tcp(2049));
 fileSystem.connections.allowDefaultPortFrom(service);
 ```
 
-#### General Network Security
+### General Network Security
 
 - Use private subnets for resources that don't need internet access.
 - Configure security groups with least privilege, allowing only necessary inbound and outbound traffic.
@@ -410,7 +421,7 @@ fileSystem.connections.allowDefaultPortFrom(service);
 - Self-contained constructs with small prop interfaces are easier to test. If instantiating a construct in a test requires building many pre-requisite resources, the construct's interface is too wide — it likely needs to internalize that knowledge.
 - Use tests as a design feedback tool: if the test setup is complex, the construct API needs simplification.
 
-#### Unit Tests
+### Unit Tests
 
 - Use fine-grained assertions to test specific aspects of resources.
 - Use `hasResourceProperties` for partial matching and `exactlyMatchTemplate` for exact matching.
@@ -418,7 +429,7 @@ fileSystem.connections.allowDefaultPortFrom(service);
 - Update snapshots only when changes are intentional.
 - Don't rely solely on snapshots; combine with fine-grained assertions.
 
-#### Integration Tests
+### Integration Tests
 
 - Use the `integ-tests-alpha` module for integration testing.
 - Create separate integration test files with the `.integ.ts` suffix.
@@ -429,33 +440,33 @@ fileSystem.connections.allowDefaultPortFrom(service);
 
 ### File Naming Conventions
 
-#### General Naming Rules
+### General Naming Rules
 
 - Use kebab-case for directory names: `data-storage/`, `search/`
 - Use kebab-case for file names: `search-stack.ts`, `lambda-function.ts`
 - Use PascalCase for class names: `SearchStack`, `LambdaFunction`
 - Use camelCase for variable and function names: `createInstance`, `databaseConfig`
 
-#### Stack Files
+### Stack Files
 
 - Name stack files with the `-stack` suffix: `search-stack.ts`
 - Name construct files descriptively based on their purpose: `application-database.ts`, `api-gateway.ts`
 
-#### Test Files
+### Test Files
 
 - Name test files with the `.test.ts` suffix.
 - Match test file names to the files they are testing: `search-stack.test.ts`
 
 ### TypeScript Conventions
 
-#### Naming Conventions
+### Naming Conventions
 
 - Use camelCase for variable and function names.
 - Use PascalCase for class names and interface names.
 - Use camelCase for interface members.
 - Use PascalCase for type names and enum names.
 
-#### Type System
+### Type System
 
 - Avoid using the `any` type as it defeats TypeScript's type checking.
 - Use specific types or create custom types when needed.
@@ -464,19 +475,19 @@ fileSystem.connections.allowDefaultPortFrom(service);
 - Use the `let` keyword instead of `var`.
 - Always define return types for functions.
 
-#### Interfaces
+### Interfaces
 
 - Use interfaces to standardize construct or stack properties.
 - Avoid empty interfaces.
 - Mark interface properties that should not be modified after initialization as `readonly`.
 
-#### Enums
+### Enums
 
 - Use enums to define sets of related constants.
 - Export enums at the global level for reuse.
 - Prefer string enums over numeric enums for better debugging and readability.
 
-#### Linting and Formatting
+### Linting and Formatting
 
 - Use ESLint to identify issues. Fix them immediately.
 

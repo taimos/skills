@@ -1,0 +1,56 @@
+name: validate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/apm-action@v1
+        with:
+          setup-only: 'true'
+          apm-version: '0.33.0'
+
+      - name: Pack the package
+        run: apm pack --dry-run
+
+      - name: Install into a scratch consumer and audit
+        run: |
+          consumer="$(mktemp -d)"
+          {
+            echo "name: ci-consumer"
+            echo "version: 0.0.0"
+            echo "targets: [claude, codex, copilot, kiro]"
+            echo "dependencies:"
+            echo "  apm:"
+            echo "  - ${GITHUB_WORKSPACE}"
+          } > "${consumer}/apm.yml"
+          cd "$consumer"
+          git init -q
+          apm install
+          apm audit
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Render the example per-diem PDF
+        run: |
+          pip install reportlab
+          python3 .apm/skills/verpflegungsmehraufwand/scripts/generate_pdf.py \
+            .apm/skills/verpflegungsmehraufwand/references/example-trip.json \
+            "${RUNNER_TEMP}/example.pdf"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Syntax-check the Cognito branding driver
+        run: node --check .apm/skills/cognito-managed-login-branding/driver.mjs
