@@ -1,137 +1,145 @@
 ---
 name: projen-upgrade
 description: >-
-  Upgrade all dependencies of a pnpm repository or pnpm workspace monorepo —
-  projen-managed or plain — to their latest COMPATIBLE (semver-safe) versions
-  while fixing as many known vulnerabilities as possible, projen-first,
-  verifying that projen still synthesizes and the build stays green at each
-  stage. Handles projen's upgrade task or its steps, plain pnpm packages, Expo
-  apps, pinned CDK / constructs versions, existing pnpm overrides, the pnpm
-  version and the pnpm minimum-release-age gate, then delivers the result as one
-  commit on a branch with a pull request. Use when asked to "upgrade
-  dependencies", "update all dependencies", "bump deps to latest", "upgrade
-  projen", "fix vulnerabilities", "fix pnpm audit", "refresh the lockfile", or
-  "get everything on the latest compatible versions", even if projen or pnpm is
-  not named explicitly. Not for a single hand-picked package bump (do that
-  directly).
+  Upgrade the dependencies of a pnpm repository or workspace to their latest
+  compatible (semver-safe) versions and fix known vulnerabilities, verifying the
+  build at each stage. Works for projen-managed and plain pnpm projects. Upgrades
+  projen first, then everything else, respects the pnpm minimum-release-age gate
+  and existing overrides, and delivers one commit and pull request. Use when asked
+  to "upgrade dependencies", "update all dependencies", "bump deps to latest",
+  "upgrade projen", "fix vulnerabilities", "fix pnpm audit" or "refresh the
+  lockfile". Not for a single hand-picked package bump.
 ---
 
-# pnpm / Projen Dependency Upgrade
+# pnpm / projen dependency upgrade
 
-Bring a pnpm repo — single package or workspace monorepo, projen-managed or not
-— to the latest **compatible** dependency versions with the fewest open
-vulnerabilities, verify it, and open one PR.
+Bring a pnpm repository to the latest compatible dependency versions with the
+fewest open vulnerabilities, verify it, and deliver one pull request.
 
-The non-negotiable order is **projen first**: bump projen, confirm it still
-synthesizes and builds, and only then upgrade the rest. A newer projen can
-change generated files or task/workflow shape, so it must be settled before any
-other dependency moves.
+The repository can be a single package or a workspace. It can be managed by
+projen or not. Do not assume anything else about it: its language, framework,
+layout and script names are found in Phase 0, not taken from this document.
 
-The skill can run unattended (CI, Claude.ai sandbox, Kiro, headless Claude
-Code). In an unattended run it never asks the user a question — every decision
-is covered by the rules below, and anything a rule cannot resolve goes into the
-PR report. In an interactive session it leaves the working tree for the user
-instead of committing (see Delivery).
+If the repository uses projen, upgrade projen first. Confirm it still
+synthesizes and the project still builds before any other dependency moves. A
+newer projen can change generated files, tasks and workflows, so settle it
+before attributing any later failure to a library.
 
-## How projen upgrades work (read before acting)
+The skill can run unattended (CI, sandbox, headless agent). In an unattended run
+it never asks the user a question. The rules below cover every decision, and
+anything they cannot resolve goes into the PR report. In an interactive session
+it leaves the working tree for the user instead of committing (see Delivery).
 
-Do not think in terms of `npm update` or hand-editing `package.json`. In a
-projen repo:
+## How projen upgrades work
 
-- **Declared versions live in `.projenrc.*` / `.projen/*.ts`**, and `package.json` / `pnpm-lock.yaml` are **generated**. Never hand-edit generated files to make a lasting change — change the source and re-synthesize with `pnpm exec projen` (or `npx projen`). The one exception is the fallback in Phase 2, which edits `package.json` transiently exactly like projen's own upgrade task does, followed by regeneration.
-- Every `NodeProject` ships an **`upgrade` task** (component `UpgradeDependencies`). Running it: runs `npm-check-updates` → installs → runs `npx projen` (re-synth) as one unit.
-- The upgrade task's default `target` is **`minor`** and `satisfyPeerDependencies` is **`true`**. So it moves deps to the latest version that is **semver-compatible and peer-compatible** — it will **not** cross a major. That is exactly "latest compatible". A new **major** requires editing the version range in the source and is out of scope unless a rule below allows it (see Majors).
-- Defaults differ by project role: `depsUpgrade`/`workflow` are `true` for the **root** project and `false` for **subprojects**. Taimos projects usually set `depsUpgrade: false`, so the `upgrade` task is often missing. Detect what actually exists rather than assume.
+Skip this section for repositories without projen.
+
+- Declared versions live in the projen source (`.projenrc.*` and any files it
+  imports). `package.json`, the lockfile, task definitions and workflows are
+  generated. Do not hand-edit generated files for a lasting change. Change the
+  source and regenerate with `pnpm exec projen`.
+- A projen project can have an `upgrade` task (component `UpgradeDependencies`).
+  It runs `npm-check-updates`, installs, and regenerates as one unit. Its
+  default target is `minor` and it respects peer dependencies, so it stays
+  inside the current major.
+- The `upgrade` task is optional. Projects often disable it
+  (`depsUpgrade: false`). Check `.projen/tasks.json` for a task named `upgrade`
+  instead of assuming it exists.
 
 ## Rules
 
-These rules are the contract. Do not deviate from them.
-
 1. **Compatible means within caret semantics.** A change of the first non-zero
    version component is a major: `1.x` to `2.x`, and also `0.28.x` to `0.29.x`
-   and `0.1.x` to `0.2.x`. Upgrade every dependency to the latest version that
-   is not a major by this definition. Existing range operators are respected:
-   `~57.0.27` stays in `57.0.x`, exact pins stay pinned (see rule 4 for the
-   toolchain constants).
-   **Exception: `projen` always goes to the latest published version**, across
-   0.x minors and real majors alike. The release-age gate (rule 6) and the
-   breakage rule (rule 9) still apply.
+   and `0.1.x` to `0.2.x`. Upgrade each dependency to the latest version that
+   is not a major by this definition. Respect existing range operators: `~1.2.3`
+   stays in `1.2.x`, exact pins stay pinned.
+   **Exception: `projen` goes to the latest published version**, across 0.x
+   minors and majors. Rules 6 and 9 still apply.
 2. **Majors only in three cases:**
    - `projen` (rule 1 exception),
    - a high or critical vulnerability can only be fixed by a major, or
-   - the user explicitly named the package (or "all majors") in the request.
-   Every major applied is flagged in the PR with its reason (for projen:
-   "projen always latest").
+   - the user named the package (or "all majors") in the request.
+   Flag every major in the PR with its reason.
 3. **Vulnerability policy:**
-   - **High and critical:** always fix (rule 2 allows a major if needed).
-   - **Low and moderate:** fix only if a compatible update fixes it and the
-     full gate stays green. Otherwise report it.
-   - **Transitive vulnerability whose parent has no compatible update that
-     pulls the fix:** report only. Never add new `overrides`,
-     `pnpm.overrides` or `resolutions` entries.
-4. **Pinned toolchain constants** (`CDK_VERSION`, `CONSTRUCTS_VERSION` or
-   similar literals in `.projen/*.ts` / `.projenrc.ts`): bump to the latest
-   compatible version (rule 1) if the full gate stays green. Packages derived
-   from them (for example `@aws-cdk/aws-amplify-alpha@${CDK_VERSION}-alpha.0`)
-   must have a matching published version that also passes the release-age gate.
+   - High and critical: always fix. Rule 2 allows a major if needed.
+   - Low and moderate: fix only if a compatible update fixes it and the
+     verification gate stays green. Otherwise report it.
+   - Transitive vulnerability whose parent has no compatible update that pulls
+     in the fix: report only. Never add new `overrides`, `pnpm.overrides` or
+     `resolutions` entries.
+4. **Version constants in config.** If the repository pins versions as literals
+   in its own config (for example a shared version constant that several
+   packages are derived from), treat them like dependencies: bump to the latest
+   compatible version if the gate stays green. Packages derived from a constant
+   must exist at the matching version and pass the release-age gate.
 5. **pnpm version:** bump to the latest compatible pnpm (rule 1). Do not touch
-   the Node version or GitHub Actions versions.
+   the Node.js version or CI action versions.
 6. **Minimum-release-age gate:** respect it. Bypass it only for a specific
    version that fixes a high or critical vulnerability, and list each bypass in
    the PR.
-7. **Existing overrides:** for each existing override entry, test whether it is
-   still needed. Remove it if it is stale and the full gate stays green.
-   Otherwise keep it.
-8. **Projen owns its files.** In projen-managed packages, never edit generated
-   files (`package.json`, `pnpm-workspace.yaml`, `.projen/tasks.json`,
-   workflows, `amplify.yml`, `cdk.json`) by hand to make a lasting change.
-   Change `.projenrc.ts` / `.projen/*.ts` and regenerate. The only exception is
-   the Phase 2 fallback, which edits `package.json` transiently exactly like
-   projen's own upgrade task does, followed by regeneration.
+7. **Existing overrides:** test whether each existing override is still needed.
+   Remove it if it is stale and the gate stays green. Otherwise keep it.
+8. **Generated files stay generated.** In projen-managed packages, never edit
+   generated files by hand for a lasting change. Change the projen source and
+   regenerate. The only exception is the Phase 2 fallback, which edits
+   `package.json` transiently the way projen's own upgrade task does, followed
+   by regeneration.
 9. **Breakage:** if an update breaks the gate, try to fix the source code, at
    most 2 attempts per package. Never loosen tests, lint rules, type checks or
    compiler settings to get green. If still red, roll that package back to its
    previous version and report it.
-10. **Delivery:** one branch, one single commit, one PR (unattended runs). In an
-    interactive session, leave the working tree for the user to review. Without push or `gh` access, deliver a patch file plus the
-    PR description instead.
+10. **Delivery:** one branch, one commit, one PR in unattended runs. In an
+    interactive session, leave the working tree for the user to review. Without
+    push or `gh` access, deliver a patch file plus the PR description.
 
-## Phase 0 — Detect environment, repo shape and clean baseline
+## Phase 0: Detect environment, repo shape and clean baseline
 
 **Environment:**
 
 | Signal | Environment | Branch handling |
 |---|---|---|
 | `GITHUB_ACTIONS=true` or `CI=true` | CI | Use the checkout as given, create the branch there |
-| Otherwise, git repo with remote | Any checkout | `git switch -c chore/deps-upgrade-<YYYY-MM-DD>` |
-| No push rights or no `gh` auth | Sandbox | Work locally, deliver a patch (Delivery) |
+| Git repo with a remote | Any checkout | `git switch -c chore/deps-upgrade-<YYYY-MM-DD>` |
+| No push rights or no `gh` auth | Sandbox | Work locally, deliver a patch (see Delivery) |
 
-Check push and PR ability early: `git ls-remote --exit-code origin` and
-`gh auth status`. Record the result; do not abort on failure.
+Check push and PR ability early with `git ls-remote --exit-code origin` and
+`gh auth status`. Record the result. Do not abort on failure.
+
+If the repository documents its own branch or PR conventions (for example a
+`CONTRIBUTING.md`), follow them for naming and targets.
 
 **Clean working tree.** Confirm `git status` is clean. Upgrades must be isolated
-and revertable. In an interactive session, if the tree is dirty, ask before
-proceeding.
+and revertable. In an interactive session, ask before proceeding on a dirty
+tree.
 
-**Repo shape.** Build an inventory before changing anything:
+**Inventory.** Build it from the repository itself before changing anything.
+Do not infer any of it from the project type.
 
-- **Workspace:** `pnpm-workspace.yaml` present. List packages with `pnpm -r ls --depth -1 --json`.
-- **Projen root:** `.projenrc.ts` (or `.js` / `.json`) and `.projen/tasks.json`. A Taimos monorepo root is a `MonorepoProject` from `@taimos/projen`.
-- **Projen sub-project:** a package directory with its own `.projen/tasks.json` and `.projen/deps.json`.
-- **Upgrade task:** for every projen project, note whether `.projen/tasks.json` contains a task named `upgrade`. A project has none whenever `depsUpgrade: false` — common on subprojects and on Taimos projects.
-- **Plain package:** no `.projen/` directory (Next.js, Angular, Expo apps, small libraries).
-- **Expo app:** plain package with `expo` in `dependencies`.
-- **CDK app:** package contains `cdk.json`. Note its synth task (`synth:silent` if defined, else `synth`).
-- **Package manager:** confirm pnpm from `packageManager` and the lockfile. Use `pnpm exec projen` consistently.
-- **Toolchain constants:** literals such as `CDK_VERSION` and `CONSTRUCTS_VERSION` in `.projen/*.ts`, and anything interpolated from them.
-- **pnpm version source:** in a `MonorepoProject`, the `pnpmWorkspaceVersion` option (default `10.33.0` in `@taimos/projen` 0.1.x) renders `packageManager`, `devEngines.packageManager` and the pnpm version of the build workflow. Elsewhere, the `packageManager` field.
-- **Release-age gate:** `minimumReleaseAge` and `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`. In a `MonorepoProject` these come from `workspaceOptions.minimumReleaseAge` / `workspaceOptions.minimumReleaseAgeExclude`.
-- **Existing overrides:** `overrides` in `pnpm-workspace.yaml` or `pnpm.overrides` in the root `package.json`. In a `MonorepoProject` they come from `workspaceOptions.overrides`.
-- **Scripts:** the root `lint` script (for example `pnpm -r run eslint`), and whether projen sub-projects already run tests inside `build`.
+- **Packages:** `pnpm-workspace.yaml` present means a workspace. List packages
+  with `pnpm -r ls --depth -1 --json`. Otherwise it is a single package.
+- **Package manager:** confirm pnpm from `packageManager` and the lockfile. Find
+  where the pnpm version is declared (`packageManager`, CI workflow pins, or a
+  projen option) and note every place.
+- **projen:** `.projenrc.*` and `.projen/tasks.json` at the root or in package
+  directories. For each projen project, note whether `.projen/tasks.json`
+  contains a task named `upgrade`.
+- **Plain packages:** packages without a `.projen/` directory.
+- **Scripts:** read the `scripts` of the root and of each package (and the
+  projen tasks) to learn what exists for build, test, lint, type checking and
+  any other validation. Use these as the verification gate. Do not invent
+  commands that the repository does not define.
+- **Release-age gate:** `minimumReleaseAge` and `minimumReleaseAgeExclude` in
+  `pnpm-workspace.yaml` or `.npmrc`. In projen repos these may be generated;
+  find the projen option that renders them.
+- **Existing overrides:** `overrides` in `pnpm-workspace.yaml` or
+  `pnpm.overrides` in the root `package.json`, and the projen option that
+  renders them if generated.
+- **Version constants:** literals in the projen source or other config that
+  pin versions used by several packages (rule 4).
 
 Write the inventory down. It drives every later step.
 
-**Baseline.** Run on the untouched tree and keep the output for the report:
+**Baseline.** On the untouched tree, run and keep the output for the report:
 
 ```bash
 corepack enable
@@ -140,110 +148,127 @@ pnpm audit --json > /tmp/audit-before.json || true
 pnpm -r outdated --format json > /tmp/outdated-before.json || true
 ```
 
-Run the gate (Verification) once. If the baseline is already red, record which
-check fails. Later failures in that check count against an upgrade only if they
-get worse; mention the pre-existing failure in the PR. Do not upgrade on top of
-a broken tree without noting it.
+Run the gate (see Verification) once. If the baseline is already red, record
+which check fails. A later failure in that check counts against an upgrade only
+if it gets worse. Mention the pre-existing failure in the PR.
 
 Convert the release-age gate to days for ncu: `cooldown = ceil(minimumReleaseAge / 1440)`
-(2880 minutes gives `--cooldown 2`). Use it in every ncu call below so ncu does
-not pick versions pnpm then rejects.
+(2880 minutes gives `--cooldown 2`). Pass it to every ncu call so ncu does not
+pick versions that pnpm then rejects. If no gate is set, omit the flag.
 
-> Do not run dev servers or watchers. Use build/test tasks only.
+Do not run dev servers or watchers. Use build and test tasks only.
 
-## Phase 1 — Upgrade projen first, in isolation
+## Phase 1: Upgrade projen first, in isolation
 
-projen is proven green before anything else moves. For every projen project
-whose `.projen/deps.json` lists `projen` (usually only the root), raise it to
-the latest version that passes the release-age gate (rule 1 exception):
+Skip this phase for repositories without projen.
+
+For every projen project whose `.projen/deps.json` lists `projen` (usually only
+the root), raise it to the latest version that passes the release-age gate:
 
 ```bash
-(cd <dir> && pnpm dlx npm-check-updates@20 --upgrade --target latest \
+(cd <dir> && pnpm dlx npm-check-updates@latest --upgrade --target latest \
    --cooldown <days> --filter projen)
 pnpm install
 pnpm exec projen
 ```
 
-If `projenVersion` is pinned in `.projenrc.*`, edit the pin instead and
-re-synth. Re-synthesis (`pnpm exec projen`) must exit 0. Inspect `git diff` for
-changes to generated files (workflows, tasks, tsconfig, `package.json`);
-confirm they look like a projen version bump, not accidental config loss, and
-summarise them in the PR. Then **build + test**. If the new projen breaks the
-gate, rule 9 applies: fix up to 2 times, else roll back to the previous version.
+If `projenVersion` is pinned in the projen source, edit the pin and regenerate
+instead. Regeneration must exit 0. Inspect `git diff` for changes to generated
+files (workflows, tasks, tsconfig, `package.json`). Confirm they look like a
+projen version bump and not lost configuration, and summarize them in the PR.
+Then run the gate. If the new projen breaks it, rule 9 applies.
 
-Run this regeneration with the new projen before Phase 2, so the upgrade steps
-and all later checks use the new generator.
+Run all later steps with the new projen.
 
-## Phase 2 — Upgrade the remaining dependencies (compatible)
+## Phase 2: Upgrade the remaining dependencies
 
-Order: toolchain constants, pnpm version, projen packages, plain packages, then
-one install.
+Order: version constants, pnpm version, projen-managed packages, plain
+packages, then one install.
 
-**pnpm version.** Find the latest compatible pnpm:
-`pnpm view pnpm@^<current-major> version --json`, take the highest. In a
-`MonorepoProject` set `pnpmWorkspaceVersion` explicitly in `.projen/monorepo.ts`
-(it is often unset and falls back to the library default). Otherwise run
-`corepack use pnpm@<version>`.
+**pnpm version.** Find the latest compatible pnpm with
+`pnpm view pnpm@^<current-major> version --json` and take the highest. Update
+every place found in the inventory. For projen repos, change the projen option
+or source that renders the version and regenerate. Elsewhere run
+`corepack use pnpm@<version>`. Keep one source of truth: if a CI workflow pins a
+pnpm version next to `packageManager`, make them equal or drop the workflow pin.
+A mismatch fails the pnpm setup step in CI before any build runs.
 
-**Toolchain constants.** For each constant, list candidate versions with
-`pnpm view <pkg>@^<current-major> time --json` and pick the newest version
-older than the release-age gate. For `CDK_VERSION`, also require that every
-derived package exists at the matching version (for example
-`pnpm view @aws-cdk/aws-amplify-alpha@<version>-alpha.0 version`). Update the
-literal once so all sub-projects inherit it.
+**Version constants.** For each constant, list candidate versions with
+`pnpm view <pkg>@^<current-major> time --json` and pick the newest version that
+is older than the release-age gate. Check that every derived package exists at
+the matching version. Update the literal once so all packages inherit it.
 
-**Projen-managed packages.** For each projen project (root first, then
-sub-projects):
+**Projen-managed packages.** For each projen project, root first:
 
-- **If an `upgrade` task exists:** run it (`pnpm exec projen upgrade`, or `(cd <dir> && pnpm exec projen upgrade)`; `pnpm -r run upgrade` when every workspace package defines it). Its ncu target is configured in projen and may be `minor`. After it runs, compare old and new versions and revert any change that is a major under rule 1 (including 0.x minor bumps), unless rule 2 allows it. Never revert the projen bump from Phase 1.
-- **If no `upgrade` task exists (fallback):** run the same steps projen's `UpgradeDependencies` would run, with `--target semver`. Do not flip `depsUpgrade` to `true` just to get the task — that is a separate config decision.
-  1. From `.projen/deps.json`, collect dependencies **without** a `version` (or `*`), excluding `projen` (handled in Phase 1). These are the ones projen lets change in `package.json`:
+- **If an `upgrade` task exists:** run it (`pnpm exec projen upgrade`, run from
+  the project directory). Its ncu target may be `minor`. Afterwards compare old
+  and new versions and revert every change that is a major under rule 1,
+  including 0.x minor bumps, unless rule 2 allows it. Keep the Phase 1 projen
+  bump.
+- **If no `upgrade` task exists (fallback):** run the steps projen's
+  `UpgradeDependencies` would run, with `--target semver`. Do not enable
+  `depsUpgrade` just to get the task. That is a separate configuration
+  decision.
+  1. From `.projen/deps.json`, collect dependencies without a `version` (or
+     with `*`), excluding `projen`. Those are the ones projen lets change in
+     `package.json`:
      ```bash
-     (cd <dir> && pnpm dlx npm-check-updates@20 --upgrade --target semver \
+     (cd <dir> && pnpm dlx npm-check-updates@latest --upgrade --target semver \
         --cooldown <days> --peer --no-deprecated \
         --dep dev,peer,prod,optional --filter <comma-separated names>)
      ```
-  2. Collect **all** dependency names from `.projen/deps.json` (excluding `workspace:*` ones) and update them within their ranges: `pnpm --filter <package-name> update <names...>`.
-  3. Run `pnpm exec projen` at the root to regenerate. Projen keeps the new versions for unversioned dependencies and restores the declared specs for constrained ones; the lockfile keeps the newer in-range resolutions. Deps whose range is **pinned in `.projenrc.*`** are overwritten by synth — raise those ranges in the source itself, then re-synth, and diff `package.json` to confirm the bumps stuck.
+  2. Collect all dependency names from `.projen/deps.json` (excluding
+     `workspace:*` ones) and update them within their ranges:
+     `pnpm --filter <package-name> update <names...>`.
+  3. Run `pnpm exec projen` at the root to regenerate. Projen keeps the new
+     versions for unversioned dependencies and restores the declared specs for
+     constrained ones. Dependencies whose range is pinned in the projen source
+     are overwritten by regeneration. Raise those ranges in the source, then
+     regenerate, and diff `package.json` to confirm the bumps stuck.
 
-**Plain packages.** For each non-projen package:
+**Plain packages.** For each package without projen:
 
 ```bash
-(cd <package-dir> && pnpm dlx npm-check-updates@20 --upgrade --target semver \
+(cd <package-dir> && pnpm dlx npm-check-updates@latest --upgrade --target semver \
    --cooldown <days> --no-deprecated)
 ```
 
-Then one `pnpm install` at the workspace root. If install fails because no
+Then run one `pnpm install` at the workspace root. If install fails because no
 version in a range is old enough (strict release-age mode), keep the previous
 version for that package and continue.
 
-After all upgrades, **re-synth once more** to be sure the tree is settled
-(`pnpm exec projen`, clean exit, no drift), then build + test. Bisect failures
-per the breakage rule (Phase 4).
+If the inventory shows packages that carry their own version-alignment tooling
+(a framework CLI that checks or fixes dependency versions, for example), run
+that tool's check as part of the gate and apply its documented fix command as
+one attempt under rule 9.
+
+After all upgrades, regenerate once more in projen repos to confirm there is no
+drift, then run the gate. Bisect failures as described in Phase 5.
 
 ### Strict per-package mode (optional)
 
-The projen `upgrade` task bumps compatible deps as one batch and the build
-validates them together — the pragmatic default. Only when the batch build
-fails do you bisect per package. If the user explicitly wants one-at-a-time
-verification (high-risk repo), upgrade in small groups: edit the source (or use
-ncu `--filter` for one package), re-synth, build+test, repeat. State which mode
-you are using.
+The default is to upgrade compatible dependencies as one batch and let the gate
+validate them together. Only when the batch fails do you bisect per package. If
+the user asks for one-at-a-time verification, upgrade in small groups: edit the
+source (or use ncu `--filter` for one package), regenerate, run the gate,
+repeat. State which mode you used.
 
-## Phase 3 — Existing overrides
+## Phase 3: Existing overrides
 
 For each override entry (rule 7):
 
-1. Remove the entry (through `workspaceOptions.overrides` in projen repos, also removing it from any comment that lists the entries) and run `pnpm install`.
+1. Remove the entry and run `pnpm install`. In projen repos, remove it through
+   the projen option that renders it.
 2. Check the result:
-   - `pnpm why <pkg> -r --json`: every resolved version still satisfies the removed floor, and
+   - `pnpm why <pkg> -r --json`: every resolved version still satisfies the
+     removed floor, and
    - `pnpm audit --json` shows no new advisory for that package.
-3. If both hold, the entry is stale: keep it removed. Otherwise restore it.
+3. If both hold, the entry is stale and stays removed. Otherwise restore it.
 
 The final gate must pass with all removals. If it fails because of a removal,
 restore that entry and re-run the gate.
 
-## Phase 4 — Vulnerabilities
+## Phase 4: Vulnerabilities
 
 ```bash
 pnpm audit --json > /tmp/audit-after-upgrade.json || true
@@ -253,96 +278,141 @@ For each remaining advisory:
 
 1. Find who pulls it in: `pnpm why <vulnerable-pkg> -r`.
 2. Classify the fix path:
-   - **Direct dependency, fix within compatible range:** should already be fixed by Phase 2. If not, the release-age gate held it back (see 3 below) or the range is a tilde or exact pin. For a tilde or exact pin, raise it to the fixing version if that is not a major.
-   - **Direct dependency, fix only in a major:** apply only for high or critical (rule 2). In projen packages raise the spec in `.projen/*.ts` and regenerate; in plain packages `pnpm dlx npm-check-updates@20 --upgrade --target latest --filter <pkg>`. Flag it.
-   - **Transitive, a compatible parent update pulls the fix:** update that parent with the methods of Phase 2. For high or critical, a parent major is allowed under rule 2 if it is the only path.
-   - **Transitive, no parent update pulls the fix:** report only (rule 3).
-3. **Release-age bypass** (high and critical only): if the fixing version is blocked by the gate, add exactly `package@version` to `minimumReleaseAgeExclude` (supported since pnpm 10.19). In a `MonorepoProject` the option replaces the library defaults, so the list must keep `projen-pipelines`, `cdk-serverless` and `@taimos/projen`. List each bypass in the PR.
-4. Low and moderate fixes are kept only if the gate stays green. If a fix breaks the gate and cannot be fixed in 2 attempts, revert it and report the advisory as open.
+   - **Direct dependency, fix within the compatible range:** Phase 2 should have
+     fixed it. If not, the release-age gate held it back, or the range is a
+     tilde or exact pin. For a pin, raise it to the fixing version if that is
+     not a major.
+   - **Direct dependency, fix only in a major:** apply only for high or
+     critical (rule 2). In projen packages raise the spec in the projen source
+     and regenerate. In plain packages use
+     `pnpm dlx npm-check-updates@latest --upgrade --target latest --filter <pkg>`.
+     Flag it.
+   - **Transitive, a compatible parent update pulls in the fix:** update that
+     parent with the Phase 2 methods. For high or critical, a parent major is
+     allowed under rule 2 if it is the only path.
+   - **Transitive, no parent update pulls in the fix:** report only (rule 3).
+3. **Release-age bypass** (high and critical only): if the gate blocks the
+   fixing version, add exactly `package@version` to `minimumReleaseAgeExclude`
+   (pnpm 10.19 and later). If the list is generated by projen or replaces a
+   default list, keep the existing entries. List each bypass in the PR.
+4. Keep low and moderate fixes only if the gate stays green. If a fix breaks the
+   gate and cannot be repaired in 2 attempts, revert it and report the advisory
+   as open.
 
-Explicit majors requested by the user are applied here as well, with the same
-methods, and flagged as "requested by user".
+Apply explicit user-requested majors here too, with the same methods, and flag
+them as "requested by user".
 
-## Phase 5 — Fix or roll back
+## Phase 5: Fix or roll back
 
 When the gate fails after upgrades (rule 9):
 
-1. Identify the responsible package from the error (stack trace, type error location, changelogs of the upgraded packages). If unclear, bisect by reverting half of the upgraded packages of the failing workspace package.
-2. Attempt a source-code fix that follows the package's migration notes, at most 2 attempts per package. For an Expo app whose `expo install --check` fails, `pnpm exec expo install --fix` in that package counts as one attempt.
-3. Forbidden fixes: skipping or deleting tests, `@ts-ignore` / `eslint-disable` additions, relaxing `tsconfig` or lint config, lowering coverage thresholds, accepting snapshot changes without understanding the diff. CDK snapshot changes are acceptable only when the diff is explained by the upgrade and are listed in the PR.
-4. If still red: revert the package. In projen packages pin the previous version in `.projen/*.ts` for this run or restore the previous lockfile entry; in plain packages restore its previous range. Re-run the gate. Record the package, the attempted fix and the error excerpt.
+1. Identify the responsible package from the error (stack trace, type error
+   location, changelogs). If unclear, bisect by reverting half of the upgraded
+   packages of the failing workspace package.
+2. Attempt a source fix that follows the package's migration notes, at most 2
+   attempts per package.
+3. Forbidden fixes: skipping or deleting tests, adding `@ts-ignore` or
+   `eslint-disable`, relaxing compiler or lint configuration, lowering coverage
+   thresholds, accepting snapshot changes without understanding the diff.
+   Snapshot changes are acceptable only when the upgrade explains the diff, and
+   they are listed in the PR.
+4. If still red, revert the package. In projen packages pin the previous
+   version in the projen source for this run, or restore the previous lockfile
+   entry. In plain packages restore the previous range. Re-run the gate. Record
+   the package, the attempted fix and the error excerpt.
 
-## Phase 6 — Majors (only when a rule allows)
+## Phase 6: Majors (only when a rule allows)
 
-"Latest compatible" stops before majors; rule 2 is the only gate. When a major
-is allowed (projen, a high/critical security fix, or a user request):
+"Latest compatible" stops before majors. Rule 2 is the only gate. When a major
+is allowed:
 
-1. Do it **deliberately, one library (or one coherent group) at a time.**
-2. Edit the version range in the source (`.projenrc.*` / `.projen/*.ts`, e.g. `'aws-cdk-lib@^2'` → `'aws-cdk-lib@^3'`), re-synth, build, test, fix breakage from the changelog per Phase 5.
-3. Never batch unrelated majors — a failing build becomes impossible to attribute.
+1. Upgrade one library, or one coherent group, at a time.
+2. Edit the version range in the source (projen source or `package.json`),
+   regenerate where needed, run the gate, and fix breakage from the changelog
+   per Phase 5.
+3. Never batch unrelated majors. A failing build becomes impossible to
+   attribute.
 4. Flag every major in the PR with its reason.
 
 ## Verification (the gate)
 
-All checks must pass before committing. Run from the workspace root:
+All checks must pass before committing. Build the check list from the
+inventory: run the install, then every build, test, lint and type-check script
+that the repository defines, at the workspace root or per package.
+
+Always include:
 
 ```bash
 pnpm install --frozen-lockfile
-# projen repos: regeneration must be stable
-pnpm exec projen && git status --porcelain > /tmp/s1 && pnpm exec projen && git status --porcelain > /tmp/s2 && diff /tmp/s1 /tmp/s2
-pnpm -r run build
-pnpm -r run test
-pnpm run lint                         # root lint script; if none: pnpm -r run lint
-# every Expo app:
-pnpm --filter <expo-package> exec expo install --check
-# every CDK app:
-pnpm --filter <cdk-package> run synth:silent   # or "synth"
 pnpm audit --json > /tmp/audit-after.json || true
+```
+
+For projen repositories, also verify that regeneration is stable:
+
+```bash
+pnpm exec projen && git status --porcelain > /tmp/s1 \
+  && pnpm exec projen && git status --porcelain > /tmp/s2 && diff /tmp/s1 /tmp/s2
 ```
 
 Notes:
 
-- `pnpm -r run test` repeats tests in projen sub-projects whose `build` already runs `test` (and their CDK synth tests). It stays in the gate; expect the extra time.
-- `cdk synth` may need context or credentials that only exist in the pipeline. If synth fails only for missing credentials or account lookups, record it as "synth not verifiable here", not as an upgrade failure.
-- Report what actually ran and its result. Never claim a check passed without running it.
+- Some projen sub-projects already run tests inside `build`. Running the tests
+  again costs time but stays in the gate.
+- A check that needs credentials, network context or services that exist only
+  in the pipeline can fail for that reason alone. Record it as "not verifiable
+  here", not as an upgrade failure.
+- Report what actually ran and its result. Never claim a check passed without
+  running it.
 
 ## Delivery
 
-**Unattended runs** produce one single commit containing everything:
+**Unattended runs** produce one commit containing everything:
 
 ```bash
 git add -A
 git commit -m "chore(deps): upgrade dependencies and fix vulnerabilities"
 ```
 
-Build the PR body from `references/pr-template.md`. The PR title must pass
-semantic PR title linting: `chore(deps): upgrade dependencies (<YYYY-MM-DD>)`.
-Do not prefix the title with markers such as `[major]`.
+Build the PR body from `references/pr-template.md`. Use the title
+`chore(deps): upgrade dependencies (<YYYY-MM-DD>)`. Do not prefix it with
+markers such as `[major]`. If the repository documents a different commit or
+title convention, follow that instead.
 
 - With push and `gh` access:
   ```bash
   git push -u origin HEAD
   gh pr create --title "chore(deps): upgrade dependencies (<YYYY-MM-DD>)" --body-file /tmp/pr-body.md
   ```
-  Add the label `dependencies` if it exists. If any major was applied, add `major-upgrade` if it exists; the "Majors applied" section of the body is the authoritative flag.
-- Without push or `gh`: run `git format-patch -1 -o <outdir>` and write the PR body to `<outdir>/PR.md`. Hand both to the user.
-
-In CI the same applies; the workflow provides the token.
+  Add the label `dependencies` if it exists. If any major was applied, add
+  `major-upgrade` if it exists. The "Majors applied" section of the body is the
+  authoritative flag.
+- Without push or `gh`: run `git format-patch -1 -o <outdir>` and write the PR
+  body to `<outdir>/PR.md`. Hand both to the user.
 
 **Interactive sessions:** do not auto-commit. Leave the working tree for the
-user to review, and summarise: projen old→new version, how many packages moved, vulnerabilities fixed and remaining, any
-held-back packages with reasons, and any majors applied with their reason. If
-the user then asks to commit, use the same conventional-commit message and no
-co-authorship or tool attribution.
+user to review and summarize the result: projen old and new version (if
+applicable), how many packages moved, vulnerabilities fixed and remaining,
+held-back packages with reasons, and majors applied with their reason. If the
+user then asks to commit, use the same commit message.
 
 ## Common pitfalls
 
-- **Editing generated files.** If you find yourself changing `package.json`, a lockfile, or a `.github/workflows/*.yml` by hand for a lasting change, stop — change the source and re-synth instead. The Phase 2 fallback's transient edit (followed by regeneration) is the only exception.
-- **Assuming an `upgrade` task exists.** Subprojects default to none, Taimos projects disable it, and some repos use dependabot/renovate. Detect from `.projen/tasks.json` and use the ncu fallback when it is absent.
-- **Skipping the projen-first step.** Upgrading everything at once hides whether a break came from projen re-synthesis or from a library, and can churn generated files unpredictably.
-- **Chasing majors under the guise of "latest".** The compatible target is minor/patch by design; majors are gated by rule 2.
-- **Adding overrides to patch a transitive vuln.** Rule 3 forbids it — report it instead.
-- **Upgrading on a red baseline.** Confirm green before you start, or record the pre-existing failure, so you can tell what your upgrade broke.
+- **Editing generated files.** If you change `package.json`, a lockfile or a
+  workflow by hand in a projen repository, stop. Change the source and
+  regenerate. The Phase 2 fallback is the only exception.
+- **Assuming an `upgrade` task exists.** Detect it from `.projen/tasks.json` and
+  use the ncu fallback when it is missing.
+- **Skipping the projen-first step.** Upgrading everything at once hides whether
+  a break came from regeneration or from a library.
+- **Chasing majors under the guise of "latest".** The compatible target is minor
+  and patch by design. Rule 2 gates majors.
+- **Adding overrides to patch a transitive vulnerability.** Rule 3 forbids it.
+  Report it instead.
+- **Upgrading on a red baseline.** Confirm green first or record the failure, so
+  you can tell what the upgrade broke.
+- **Two sources for the pnpm version.** A `packageManager` field and a CI
+  workflow pin that disagree fail the pnpm setup step in CI, which a local build
+  does not show. Wait for the CI checks on the PR and fix red ones.
 
 ## Reference material
 

@@ -23,10 +23,8 @@ fixed, how many remain, whether any major was applied>
 | Item | From | To |
 |---|---|---|
 | pnpm | | |
-| CDK_VERSION (aws-cdk-lib and derived alpha modules) | | |
-| CONSTRUCTS_VERSION | | |
-| projen | | |
-| @taimos/projen | | |
+| projen (if used) | | |
+| <version constant, if any> | | |
 
 ## projen regeneration changes
 
@@ -81,19 +79,18 @@ tilde range, exact pin, or blocked by the release-age gate).
 ## Code changes
 
 <source changes made to keep the build green, with the migration note that
-required them; CDK snapshot changes with explanation>
+required them; snapshot changes with explanation>
 
 ## Verification
 
 | Check | Result |
 |---|---|
 | pnpm install --frozen-lockfile | |
-| projen regenerate is stable | |
-| pnpm -r run build | |
-| pnpm -r run test | |
-| lint | |
-| expo install --check (<apps>) | |
-| cdk synth (<apps>) | |
+| projen regenerate is stable (projen repos only) | |
+| build (<command used>) | |
+| test (<command used>) | |
+| lint / type check (<command used>) | |
+| <other checks the repository defines, one row each> | |
 | pnpm audit | |
 
 <pre-existing failures from the baseline, if any>
