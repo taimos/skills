@@ -6,7 +6,7 @@
     ["@semantic-release/release-notes-generator", { "preset": "conventionalcommits" }],
     ["@semantic-release/exec", { "prepareCmd": "./scripts/set-version.sh ${nextRelease.version}" }],
     ["@semantic-release/git", {
-      "assets": ["apm.yml"],
+      "assets": ["apm.yml", ".claude-plugin/marketplace.json", "dist/**"],
       "message": "chore(release): v${nextRelease.version} [skip ci]"
     }],
     ["@semantic-release/github", {

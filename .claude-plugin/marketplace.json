@@ -1,0 +1,15 @@
+{
+  "name": "taimos-skills",
+  "owner": {
+    "name": "Taimos GmbH",
+    "url": "https://github.com/taimos"
+  },
+  "plugins": [
+    {
+      "name": "taimos-skills",
+      "description": "CDK reviews, Cognito Managed Login branding, requirement interviews, pnpm/projen dependency upgrades, management summaries and German per-diem statements",
+      "version": "1.0.0",
+      "source": "./dist/taimos-skills"
+    }
+  ]
+}
