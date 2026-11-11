@@ -1,5 +1,5 @@
 name: taimos-skills
-version: 1.0.0
+version: 1.1.0
 description: "Public agent skills by Taimos GmbH: CDK reviews, Cognito Managed Login branding, requirement interviews, pnpm/projen dependency upgrades, management summaries and German per-diem statements."
 author: Taimos GmbH
 license: MIT
@@ -27,4 +27,4 @@ marketplace:
     - name: taimos-skills
       description: CDK reviews, Cognito Managed Login branding, requirement interviews, pnpm/projen dependency upgrades, management summaries and German per-diem statements
       source: ./dist/taimos-skills
-      version: 1.0.0
+      version: 1.1.0

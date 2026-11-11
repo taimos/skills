@@ -1,9 +1,9 @@
 pack:
   format: claude-plugin
   target: all
-  packed_at: '2026-11-11T15:40:13.041792+00:00'
+  packed_at: '2026-11-11T15:46:14.962933+00:00'
   bundle_files:
-    plugin.json: 6234af487e453a6c31bebfe5d8b7cb828c38c06d5626612ce63055a323a8cc76
+    plugin.json: f463bf2d9518a92af4f2c107db51b74a2fc0a377dc8809a78550b0e19ebc2174
     skills/cdk-review/SKILL.md: 13f52cdd08179df842ed4bb2325e0acc833474dddfeec89f4b3acdd98e7fba5a
     skills/cognito-managed-login-branding/SKILL.md: 5a9345cc993703760835fe6111a0758744d146f5b04f6d395e7de658bf361c03
     skills/cognito-managed-login-branding/driver.mjs: c8af4f4bb55e1d9cbcd1f552fe7bd7e7dbf782974500eb0d940e5afc273eea53
