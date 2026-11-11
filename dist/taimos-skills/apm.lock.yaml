@@ -1,0 +1,675 @@
+pack:
+  format: claude-plugin
+  target: all
+  packed_at: '2026-11-11T15:40:13.041792+00:00'
+  bundle_files:
+    plugin.json: 6234af487e453a6c31bebfe5d8b7cb828c38c06d5626612ce63055a323a8cc76
+    skills/cdk-review/SKILL.md: 13f52cdd08179df842ed4bb2325e0acc833474dddfeec89f4b3acdd98e7fba5a
+    skills/cognito-managed-login-branding/SKILL.md: 5a9345cc993703760835fe6111a0758744d146f5b04f6d395e7de658bf361c03
+    skills/cognito-managed-login-branding/driver.mjs: c8af4f4bb55e1d9cbcd1f552fe7bd7e7dbf782974500eb0d940e5afc273eea53
+    skills/cognito-managed-login-branding/references/asset-catalog.md: 7f9d7e2d5e22e4abfaf930df38abbcedd029ff6b7b68187b7d26699ded0674d8
+    skills/cognito-managed-login-branding/references/branding-intake.md: 411a319f35c09831c2bf55b33c84735c521fc0b124c07f25e6e789149a2b4b61
+    skills/cognito-managed-login-branding/references/branding-settings.example.json: 260b3ca946a3d0783047054677159663d986c69006e1f0bf36a432d2cfe8e8ec
+    skills/cognito-managed-login-branding/references/branding-settings.md: b065db5cc593d2f98eaff5b92dc7eb8b3d978cbab15d05b2fbd43884131fb019
+    skills/cognito-managed-login-branding/references/svg-templates/favicon.svg: 2a3d8181ad10521682194b54760d21664acdc7ef0ea40fd6f6e1f685be305258
+    skills/cognito-managed-login-branding/references/svg-templates/form-logo.svg: 631bd28141d92da66a06d7aaa68acafa7361aa8bb605018a3d130ed682c24182
+    skills/interview/SKILL.md: 06694a166f9c9d6d0e488b7166325c73b82e4df4fcc84d9007e83388fdfeac24
+    skills/management-summary/SKILL.md: 7602f0e25173a475a5a15d0556699911a5d21b345599da2b8107c177faa76f36
+    skills/management-summary/references/template-en.md: 7fc8cc4b881047e547ed8ffc18bdd4b336df7e89e8eab3ae4f4d42a9d702cd98
+    skills/management-summary/references/vorlage-de.md: 6205a22a7fef5d4679b9010c1752e71dbf811f55dc12142b907ce0b37c0568dd
+    skills/projen-upgrade/SKILL.md: 01dc160e4ffbdc25e62bc2c4872e5ddc4f9d5a63e16692e701a7386e916cf67b
+    skills/projen-upgrade/references/pr-template.md: 4f7a4db7b1463dcec73de140c8a6692a552a136248c3e4b8caf5a867a5291d03
+    skills/verpflegungsmehraufwand/SKILL.md: e75bbd60d031b1280f3e323a09360654d863888df4914401e6036411104c30df
+    skills/verpflegungsmehraufwand/references/example-trip.json: 88f2cdcfd5d3ac574164528235c68f17dfea74241aba7d3bb5413814c0bf2510
+    skills/verpflegungsmehraufwand/scripts/generate_pdf.py: 38106d950166ac2835ca9b7e1bf8c4749ee6274adf5ddf1e2ded1540720ba673
+lockfile_version: '1'
+dependencies: []
+deployments:
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cdk-review
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cdk-review/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:13f52cdd08179df842ed4bb2325e0acc833474dddfeec89f4b3acdd98e7fba5a
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5a9345cc993703760835fe6111a0758744d146f5b04f6d395e7de658bf361c03
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/driver.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c8af4f4bb55e1d9cbcd1f552fe7bd7e7dbf782974500eb0d940e5afc273eea53
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/references/asset-catalog.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7f9d7e2d5e22e4abfaf930df38abbcedd029ff6b7b68187b7d26699ded0674d8
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/references/branding-intake.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:411a319f35c09831c2bf55b33c84735c521fc0b124c07f25e6e789149a2b4b61
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/references/branding-settings.example.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:260b3ca946a3d0783047054677159663d986c69006e1f0bf36a432d2cfe8e8ec
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/references/branding-settings.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b065db5cc593d2f98eaff5b92dc7eb8b3d978cbab15d05b2fbd43884131fb019
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/references/svg-templates/favicon.svg
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2a3d8181ad10521682194b54760d21664acdc7ef0ea40fd6f6e1f685be305258
+- kind: project-relative
+  target: claude
+  value: .claude/skills/cognito-managed-login-branding/references/svg-templates/form-logo.svg
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:631bd28141d92da66a06d7aaa68acafa7361aa8bb605018a3d130ed682c24182
+- kind: project-relative
+  target: claude
+  value: .claude/skills/interview
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/interview/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:06694a166f9c9d6d0e488b7166325c73b82e4df4fcc84d9007e83388fdfeac24
+- kind: project-relative
+  target: claude
+  value: .claude/skills/management-summary
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/management-summary/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7602f0e25173a475a5a15d0556699911a5d21b345599da2b8107c177faa76f36
+- kind: project-relative
+  target: claude
+  value: .claude/skills/management-summary/references/template-en.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7fc8cc4b881047e547ed8ffc18bdd4b336df7e89e8eab3ae4f4d42a9d702cd98
+- kind: project-relative
+  target: claude
+  value: .claude/skills/management-summary/references/vorlage-de.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6205a22a7fef5d4679b9010c1752e71dbf811f55dc12142b907ce0b37c0568dd
+- kind: project-relative
+  target: claude
+  value: .claude/skills/projen-upgrade
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/projen-upgrade/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:01dc160e4ffbdc25e62bc2c4872e5ddc4f9d5a63e16692e701a7386e916cf67b
+- kind: project-relative
+  target: claude
+  value: .claude/skills/projen-upgrade/references/pr-template.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4f7a4db7b1463dcec73de140c8a6692a552a136248c3e4b8caf5a867a5291d03
+- kind: project-relative
+  target: claude
+  value: .claude/skills/verpflegungsmehraufwand
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: claude
+  value: .claude/skills/verpflegungsmehraufwand/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e75bbd60d031b1280f3e323a09360654d863888df4914401e6036411104c30df
+- kind: project-relative
+  target: claude
+  value: .claude/skills/verpflegungsmehraufwand/references/example-trip.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:88f2cdcfd5d3ac574164528235c68f17dfea74241aba7d3bb5413814c0bf2510
+- kind: project-relative
+  target: claude
+  value: .claude/skills/verpflegungsmehraufwand/scripts/generate_pdf.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:38106d950166ac2835ca9b7e1bf8c4749ee6274adf5ddf1e2ded1540720ba673
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cdk-review
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cdk-review/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:13f52cdd08179df842ed4bb2325e0acc833474dddfeec89f4b3acdd98e7fba5a
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5a9345cc993703760835fe6111a0758744d146f5b04f6d395e7de658bf361c03
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/driver.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c8af4f4bb55e1d9cbcd1f552fe7bd7e7dbf782974500eb0d940e5afc273eea53
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/references/asset-catalog.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7f9d7e2d5e22e4abfaf930df38abbcedd029ff6b7b68187b7d26699ded0674d8
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/references/branding-intake.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:411a319f35c09831c2bf55b33c84735c521fc0b124c07f25e6e789149a2b4b61
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/references/branding-settings.example.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:260b3ca946a3d0783047054677159663d986c69006e1f0bf36a432d2cfe8e8ec
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/references/branding-settings.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b065db5cc593d2f98eaff5b92dc7eb8b3d978cbab15d05b2fbd43884131fb019
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/references/svg-templates/favicon.svg
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2a3d8181ad10521682194b54760d21664acdc7ef0ea40fd6f6e1f685be305258
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/cognito-managed-login-branding/references/svg-templates/form-logo.svg
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:631bd28141d92da66a06d7aaa68acafa7361aa8bb605018a3d130ed682c24182
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/interview
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/interview/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:06694a166f9c9d6d0e488b7166325c73b82e4df4fcc84d9007e83388fdfeac24
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/management-summary
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/management-summary/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7602f0e25173a475a5a15d0556699911a5d21b345599da2b8107c177faa76f36
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/management-summary/references/template-en.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7fc8cc4b881047e547ed8ffc18bdd4b336df7e89e8eab3ae4f4d42a9d702cd98
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/management-summary/references/vorlage-de.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6205a22a7fef5d4679b9010c1752e71dbf811f55dc12142b907ce0b37c0568dd
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/projen-upgrade
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/projen-upgrade/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:01dc160e4ffbdc25e62bc2c4872e5ddc4f9d5a63e16692e701a7386e916cf67b
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/projen-upgrade/references/pr-template.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4f7a4db7b1463dcec73de140c8a6692a552a136248c3e4b8caf5a867a5291d03
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/verpflegungsmehraufwand
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/verpflegungsmehraufwand/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e75bbd60d031b1280f3e323a09360654d863888df4914401e6036411104c30df
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/verpflegungsmehraufwand/references/example-trip.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:88f2cdcfd5d3ac574164528235c68f17dfea74241aba7d3bb5413814c0bf2510
+- kind: project-relative
+  target: kiro
+  value: .kiro/skills/verpflegungsmehraufwand/scripts/generate_pdf.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:38106d950166ac2835ca9b7e1bf8c4749ee6274adf5ddf1e2ded1540720ba673
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cdk-review
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cdk-review/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:13f52cdd08179df842ed4bb2325e0acc833474dddfeec89f4b3acdd98e7fba5a
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:5a9345cc993703760835fe6111a0758744d146f5b04f6d395e7de658bf361c03
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/driver.mjs
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:c8af4f4bb55e1d9cbcd1f552fe7bd7e7dbf782974500eb0d940e5afc273eea53
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/references/asset-catalog.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7f9d7e2d5e22e4abfaf930df38abbcedd029ff6b7b68187b7d26699ded0674d8
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/references/branding-intake.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:411a319f35c09831c2bf55b33c84735c521fc0b124c07f25e6e789149a2b4b61
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/references/branding-settings.example.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:260b3ca946a3d0783047054677159663d986c69006e1f0bf36a432d2cfe8e8ec
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/references/branding-settings.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:b065db5cc593d2f98eaff5b92dc7eb8b3d978cbab15d05b2fbd43884131fb019
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/references/svg-templates/favicon.svg
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:2a3d8181ad10521682194b54760d21664acdc7ef0ea40fd6f6e1f685be305258
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/cognito-managed-login-branding/references/svg-templates/form-logo.svg
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:631bd28141d92da66a06d7aaa68acafa7361aa8bb605018a3d130ed682c24182
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/interview
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/interview/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:06694a166f9c9d6d0e488b7166325c73b82e4df4fcc84d9007e83388fdfeac24
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/management-summary
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/management-summary/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7602f0e25173a475a5a15d0556699911a5d21b345599da2b8107c177faa76f36
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/management-summary/references/template-en.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:7fc8cc4b881047e547ed8ffc18bdd4b336df7e89e8eab3ae4f4d42a9d702cd98
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/management-summary/references/vorlage-de.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:6205a22a7fef5d4679b9010c1752e71dbf811f55dc12142b907ce0b37c0568dd
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/projen-upgrade
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/projen-upgrade/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:01dc160e4ffbdc25e62bc2c4872e5ddc4f9d5a63e16692e701a7386e916cf67b
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/projen-upgrade/references/pr-template.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:4f7a4db7b1463dcec73de140c8a6692a552a136248c3e4b8caf5a867a5291d03
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/verpflegungsmehraufwand
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: null
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/verpflegungsmehraufwand/SKILL.md
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:e75bbd60d031b1280f3e323a09360654d863888df4914401e6036411104c30df
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/verpflegungsmehraufwand/references/example-trip.json
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:88f2cdcfd5d3ac574164528235c68f17dfea74241aba7d3bb5413814c0bf2510
+- kind: project-relative
+  target: legacy
+  value: .agents/skills/verpflegungsmehraufwand/scripts/generate_pdf.py
+  runtime: null
+  scope: project
+  owners:
+  - .
+  active_owner: .
+  content_hash: sha256:38106d950166ac2835ca9b7e1bf8c4749ee6274adf5ddf1e2ded1540720ba673

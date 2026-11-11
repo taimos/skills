@@ -1,0 +1,106 @@
+# PR description template
+
+Title: `chore(deps): upgrade dependencies (<YYYY-MM-DD>)`. No `[major]` or
+other prefix; repos lint PR titles against conventional commit types.
+
+Fill every section. Write "none" for empty sections instead of removing them,
+so reviewers see that the case was checked.
+
+```markdown
+## Summary
+
+<one or two sentences: how many packages upgraded, how many vulnerabilities
+fixed, how many remain, whether any major was applied>
+
+## Majors applied
+
+| Package | Workspace package | From | To | Reason |
+|---|---|---|---|---|
+| <pkg> | <workspace pkg> | <x.y.z> | <x.y.z> | security: <GHSA-id> (high) / requested by user / projen always latest |
+
+## Toolchain
+
+| Item | From | To |
+|---|---|---|
+| pnpm | | |
+| projen (if used) | | |
+| projen-pipelines (if used) | | |
+| cdk-serverless (if used) | | |
+| aws-cdk-lib / aws-cdk / constructs (if used) | | |
+| <version constant, if any> | | |
+
+## projen regeneration changes
+
+<generated files changed by the new projen version, one line each, or "none">
+
+## Generated output changes (projen libraries)
+
+<workflow, pipeline task or generated API code changes caused by projen,
+projen-pipelines or cdk-serverless upgrades, or "none" / "not used">
+
+## Upgraded dependencies
+
+<table per workspace package, or a collapsed <details> block if long>
+
+| Workspace package | Dependency | From | To |
+|---|---|---|---|
+
+## Vulnerabilities
+
+Before: <critical> critical, <high> high, <moderate> moderate, <low> low
+After:  <critical> critical, <high> high, <moderate> moderate, <low> low
+
+### Fixed
+
+| Advisory | Severity | Package | Fixed by |
+|---|---|---|---|
+
+### Still open
+
+| Advisory | Severity | Package | Path | Reason |
+|---|---|---|---|---|
+| | | | <parent > child> | no compatible parent update / fix breaks gate / low-moderate needs major |
+
+## Overrides removed
+
+| Override | Floor | Resolved versions without it |
+|---|---|---|
+
+## Held back
+
+Newer versions exist but were not applied (major under caret semantics,
+tilde range, exact pin, or blocked by the release-age gate).
+
+| Package | Workspace package | Current | Newest | Reason |
+|---|---|---|---|---|
+
+## Release-age gate bypasses
+
+| Package@version | Advisory | Severity |
+|---|---|---|
+
+## Rolled back
+
+| Package | Attempted version | Error (excerpt) | Fix attempts |
+|---|---|---|---|
+
+## Code changes
+
+<source changes made to keep the build green, with the migration note that
+required them; snapshot changes with explanation>
+
+## Verification
+
+| Check | Result |
+|---|---|
+| pnpm install --frozen-lockfile | |
+| projen regenerate is stable (projen repos only) | |
+| build (<command used>) | |
+| test (<command used>) | |
+| lint / type check (<command used>) | |
+| synth (<CDK apps>, if any) | |
+| <other checks the repository defines, one row each> | |
+| pnpm audit | |
+
+<pre-existing failures from the baseline, if any>
+```

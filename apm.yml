@@ -12,3 +12,19 @@ dependencies:
   apm: []
   mcp: []
 includes: auto
+
+marketplace:
+  owner:
+    name: Taimos GmbH
+    url: https://github.com/taimos
+  build:
+    tagPattern: "v{version}"
+  outputs:
+    claude: {}
+  versioning:
+    strategy: lockstep
+  packages:
+    - name: taimos-skills
+      description: CDK reviews, Cognito Managed Login branding, requirement interviews, pnpm/projen dependency upgrades, management summaries and German per-diem statements
+      source: ./dist/taimos-skills
+      version: 1.0.0

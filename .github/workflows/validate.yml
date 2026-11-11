@@ -18,8 +18,14 @@ jobs:
           setup-only: 'true'
           apm-version: '0.33.0'
 
+      - name: Versions aligned and marketplace.json up to date
+        run: apm pack --check-versions --check-clean --dry-run
+
       - name: Pack the package
         run: apm pack --dry-run
+
+      - name: Build the Claude plugin bundle
+        run: scripts/build-dist.sh "$(mktemp -d)"
 
       - name: Install into a scratch consumer and audit
         run: |

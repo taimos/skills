@@ -2,3 +2,5 @@ build/
 apm_modules/
 .DS_Store
 __pycache__/
+.github/plugin/
+.claude-plugin/plugin.json

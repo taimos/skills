@@ -1,0 +1,45 @@
+{
+  "title": "Hamburg / Hannover",
+  "created": "2026-09-27",
+  "traveller": {
+    "name": "Erika Musterfrau",
+    "role": "Geschäftsführerin Beispiel GmbH",
+    "address": "Musterstraße 1, 12345 Musterstadt"
+  },
+  "period": {"start": "2026-09-14", "end": "2026-09-17"},
+  "purposes": [
+    "Fachkonferenz Cloud Summit 2026, Messe Hamburg (Vortrag und Standbetreuung)",
+    "Partnertreffen, Büro der Partner AG, Hamburg",
+    "Workshop \"Infrastructure as Code\" bei der Kunde AG, Hannover"
+  ],
+  "vehicle": "Firmenwagen der Beispiel GmbH",
+  "itinerary": [
+    {"date": "2026-09-14", "time": "Abfahrt 08:00 Musterstadt", "place": "Musterstadt → Hamburg", "activity": "Anreise, abends Speaker-Dinner des Veranstalters"},
+    {"date": "2026-09-15", "time": "ganztägig", "place": "Messe Hamburg", "activity": "Konferenz 08:00 bis 18:00"},
+    {"date": "2026-09-16", "time": "ganztägig", "place": "Hamburg → Hannover", "activity": "Partnertreffen 09:00 bis 15:00, Fahrt nach Hannover"},
+    {"date": "2026-09-17", "time": "Rückkehr ca. 20:00 Musterstadt", "place": "Hannover → Musterstadt", "activity": "Workshop 09:00 bis 17:00, Rückfahrt"}
+  ],
+  "days": [
+    {"date": "2026-09-14", "type": "arrival"},
+    {"date": "2026-09-15", "type": "full"},
+    {"date": "2026-09-16", "type": "full"},
+    {"date": "2026-09-17", "type": "departure", "breakfast": true}
+  ],
+  "deduction_notes": [
+    "<b>17.09., Frühstück:</b> Im Zimmerpreis des Hotel Beispielhof enthalten und von der Beispiel GmbH bezahlt. Kürzung um 5,60 €.",
+    "<b>14.09. bis 16.09., Hotel Am Hafen:</b> Kein Frühstück gebucht, keine Kürzung.",
+    "<b>Weitere Mahlzeiten:</b> Die Beispiel GmbH hat während der Reise keine weiteren Mahlzeiten bezahlt oder veranlasst. Verpflegung durch Dritte (Veranstalter, Partner, Kunde) führt nach § 9 Abs. 4a Satz 8 EStG zu keiner Kürzung."
+  ],
+  "hotels_heading": "Übernachtungen (nachrichtlich, von der Beispiel GmbH per Firmenkreditkarte bezahlt)",
+  "hotels": [
+    {"name": "Hotel Am Hafen, Hafenstraße 10, 20000 Hamburg", "period": "14.09. bis 16.09.2026", "nights": "2", "amount": "196,00 € (2 × 92,00 € Logis + 2 × 6,00 € Kulturtaxe)", "breakfast": "nicht enthalten", "receipt": "Hotelrechnung Nr. 4711"},
+    {"name": "Hotel Beispielhof, Beispielweg 5, 30000 Hannover", "period": "16.09. bis 17.09.2026", "nights": "1", "amount": "89,00 €", "breakfast": "enthalten (12,00 €)", "receipt": "Hotelrechnung Nr. 0815"}
+  ],
+  "hotel_notes": [
+    "Die Übernachtungskosten sind nicht Teil der Erstattung an die Reisende."
+  ],
+  "travel_costs_note": "Die Reise erfolgte mit dem Firmenwagen der Beispiel GmbH. Eine Kilometerpauschale fällt nicht an. Tank- und Parkkosten werden über die Belege direkt bei der Beispiel GmbH gebucht.",
+  "branding": {
+    "footer": "Beispiel GmbH · Musterstraße 1 · 12345 Musterstadt"
+  }
+}

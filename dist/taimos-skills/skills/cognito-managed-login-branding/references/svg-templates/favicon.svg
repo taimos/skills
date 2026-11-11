@@ -1,0 +1,14 @@
+<!--
+  Cognito FAVICON_SVG template — square 1:1 icon.
+  Cognito-safe: no role/aria attributes, no scripts, viewBox 64x64 (1:1).
+  Replace:
+    {{ACCENT}}   background fill      (e.g. #4F46E5)
+    {{FG}}       glyph colour         (e.g. #F9FAFB)
+    {{INITIAL}}  one letter/glyph     (e.g. N)
+  colorMode DYNAMIC works well for a favicon (same mark in light and dark).
+-->
+<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <rect width="64" height="64" rx="14" fill="{{ACCENT}}"/>
+  <text x="32" y="34" font-family="Arial, Helvetica, sans-serif" font-size="40"
+        font-weight="700" fill="{{FG}}" text-anchor="middle" dominant-baseline="central">{{INITIAL}}</text>
+</svg>
