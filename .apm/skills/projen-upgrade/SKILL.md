@@ -8,7 +8,9 @@ description: >-
   and existing overrides, and delivers one commit and pull request. Use when asked
   to "upgrade dependencies", "update all dependencies", "bump deps to latest",
   "upgrade projen", "fix vulnerabilities", "fix pnpm audit" or "refresh the
-  lockfile". Not for a single hand-picked package bump.
+  lockfile". Detects AWS CDK projects and the projen-pipelines and cdk-serverless
+  libraries and handles them when present. Not for a single hand-picked package
+  bump.
 ---
 
 # pnpm / projen dependency upgrade
@@ -46,6 +48,59 @@ Skip this section for repositories without projen.
   (`depsUpgrade: false`). Check `.projen/tasks.json` for a task named `upgrade`
   instead of assuming it exists.
 
+## CDK projects and projen libraries
+
+Skip this section for repositories where Phase 0 finds none of the following.
+Never assume they exist. Detect each one and apply only what is present.
+
+- **AWS CDK app or library:** `cdk.json` in a package, `aws-cdk-lib` in its
+  dependencies, or a projen `awscdk.*` project type. The CDK version is often a
+  literal in the projen source (an option such as `cdkVersion`, or a constant
+  shared across packages). Packages derived from it must move together:
+  `aws-cdk-lib`, the `aws-cdk` CLI, `constructs`, and experimental modules
+  whose version is tied to the CDK version (for example `@aws-cdk/*-alpha`
+  packages published as `<cdk-version>-alpha.0`).
+- **cdk-serverless:** a projen project type (`ServerlessProject`) built on the
+  CDK app type, with runtime constructs. It declares peer ranges for
+  `projen`, `aws-cdk-lib`, several AWS SDK v3 clients and `openapi-typescript`.
+  Regeneration (`pnpm exec projen`) can rewrite generated API types and models
+  from the OpenAPI or GraphQL definitions.
+- **projen-pipelines:** a projen library that generates CI/CD pipelines for CDK
+  apps, such as GitHub Actions workflows and pipeline tasks. It declares peer
+  ranges for `projen` and `constructs`. Subproject pipelines attach their
+  workflows to the repository root's `.github/workflows/`.
+
+When present, the library `llm.md` in `node_modules/<library>/` documents the
+current options. Read it before changing a library's configuration.
+
+How this changes the procedure:
+
+- **Peer ranges decide the order.** `projen-pipelines` and `cdk-serverless`
+  peer-depend on a range of projen versions. Before the Phase 1 projen bump,
+  read the installed libraries' `peerDependencies`. If the latest projen falls
+  outside a library's range, upgrade that library to the latest version whose
+  range includes the new projen, in the same step. If no such version exists,
+  use the highest projen that satisfies every installed range, and report the
+  newer projen as held back with the reason. This is the one case where rule 1's
+  projen exception yields.
+- **Upgrade the libraries in Phase 1, with projen.** They are projen
+  extensions, so their output changes with their version. Settle them before
+  other dependencies, and regenerate after each bump.
+- **Review regenerated output.** After regeneration, inspect the diff of
+  generated workflows, pipeline tasks and generated API code. Summarize them in
+  the PR. Treat unexpected deletions of pipeline stages, environments or
+  generated models as breakage under rule 9.
+- **Keep the CDK family consistent.** Bump `aws-cdk-lib`, the `aws-cdk` CLI,
+  `constructs` and tied experimental modules to one compatible CDK version,
+  and check the result against the `aws-cdk-lib` peer range of cdk-serverless.
+  Use rule 4 for the literal.
+- **Gate additions.** Run each CDK app's synth task (the one its scripts or
+  tasks define; prefer a quiet variant if one exists) and any snapshot or
+  assertion tests. A snapshot diff is acceptable only when the upgrade explains
+  it and the PR lists it. Synth that fails only for missing credentials or
+  context lookups is "not verifiable here" (see Verification).
+- **No new overrides for CDK transitive findings.** Rule 3 applies unchanged.
+
 ## Rules
 
 1. **Compatible means within caret semantics.** A change of the first non-zero
@@ -54,7 +109,9 @@ Skip this section for repositories without projen.
    is not a major by this definition. Respect existing range operators: `~1.2.3`
    stays in `1.2.x`, exact pins stay pinned.
    **Exception: `projen` goes to the latest published version**, across 0.x
-   minors and majors. Rules 6 and 9 still apply.
+   minors and majors. Rules 6 and 9 still apply. The one other limit is the
+   peer range of an installed projen library (see "CDK projects and projen
+   libraries").
 2. **Majors only in three cases:**
    - `projen` (rule 1 exception),
    - a high or critical vulnerability can only be fixed by a major, or
@@ -136,6 +193,10 @@ Do not infer any of it from the project type.
   renders them if generated.
 - **Version constants:** literals in the projen source or other config that
   pin versions used by several packages (rule 4).
+- **CDK and projen libraries:** for each package, note whether it is a CDK app
+  or library (`cdk.json`, `aws-cdk-lib`, `awscdk.*` project types), and whether
+  `cdk-serverless` or `projen-pipelines` is installed. Record the installed
+  versions and their `peerDependencies`. Note each CDK app's synth task.
 
 Write the inventory down. It drives every later step.
 
@@ -163,11 +224,17 @@ Do not run dev servers or watchers. Use build and test tasks only.
 Skip this phase for repositories without projen.
 
 For every projen project whose `.projen/deps.json` lists `projen` (usually only
-the root), raise it to the latest version that passes the release-age gate:
+the root), raise it to the latest version that passes the release-age gate and
+satisfies the peer ranges of installed projen libraries (see "CDK projects and
+projen libraries"). Upgrade those libraries in the same step:
 
 ```bash
 (cd <dir> && pnpm dlx npm-check-updates@latest --upgrade --target latest \
    --cooldown <days> --filter projen)
+# only if installed: raise them within their compatible range, or to the version
+# whose peer range includes the new projen
+(cd <dir> && pnpm dlx npm-check-updates@latest --upgrade --target semver \
+   --cooldown <days> --filter projen-pipelines,cdk-serverless)
 pnpm install
 pnpm exec projen
 ```
@@ -192,6 +259,11 @@ or source that renders the version and regenerate. Elsewhere run
 `corepack use pnpm@<version>`. Keep one source of truth: if a CI workflow pins a
 pnpm version next to `packageManager`, make them equal or drop the workflow pin.
 A mismatch fails the pnpm setup step in CI before any build runs.
+
+**CDK family.** If the repository has CDK packages, move `aws-cdk-lib`, `aws-cdk`,
+`constructs` and tied experimental modules together (see "CDK projects and
+projen libraries"). Tied modules need the matching `<cdk-version>-alpha.0`
+style version to exist and pass the release-age gate.
 
 **Version constants.** For each constant, list candidate versions with
 `pnpm view <pkg>@^<current-major> time --json` and pick the newest version that
@@ -346,6 +418,11 @@ Always include:
 pnpm install --frozen-lockfile
 pnpm audit --json > /tmp/audit-after.json || true
 ```
+
+For each CDK app found in Phase 0, add its synth task and any snapshot or
+assertion tests. If `projen-pipelines` is installed, add a check that the
+generated pipeline workflows are unchanged by a second regeneration (the
+stability check below covers this).
 
 For projen repositories, also verify that regeneration is stable:
 

@@ -12,7 +12,7 @@ Works with Claude Code, Kiro, Codex, GitHub Copilot, Cursor, OpenCode and any ot
 | [cognito-managed-login-branding](.apm/skills/cognito-managed-login-branding/SKILL.md) | Create, validate and fix Amazon Cognito Managed Login branding assets (logos/favicons), catching the server-enforced rules `CfnManagedLoginBranding` fails on before `cdk deploy`. |
 | [interview](.apm/skills/interview/SKILL.md) | Interview the user about a feature or topic without guessing, track confirmed decisions and write an implementation plan. |
 | [management-summary](.apm/skills/management-summary/SKILL.md) | Condense a long document, report or transcript into a one-page Management Summary for a board or committee (German and English templates). |
-| [projen-upgrade](.apm/skills/projen-upgrade/SKILL.md) | Upgrade the dependencies of a pnpm repo or workspace (projen-managed or plain) to the latest compatible versions, fix vulnerabilities, verify the build and deliver one commit and PR. |
+| [projen-upgrade](.apm/skills/projen-upgrade/SKILL.md) | Upgrade the dependencies of a pnpm repo or workspace (projen-managed or plain) to the latest compatible versions, fix vulnerabilities, verify the build and deliver one commit and PR. Detects AWS CDK projects, projen-pipelines and cdk-serverless and handles them when present. |
 | [verpflegungsmehraufwand](.apm/skills/verpflegungsmehraufwand/SKILL.md) | Build a German per-diem statement (Verpflegungsmehraufwand, § 9 Abs. 4a EStG) as PDF from calendar entries and hotel bookings. Not tax advice. |
 
 ## Installation

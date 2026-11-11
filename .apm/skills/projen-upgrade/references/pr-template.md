@@ -24,11 +24,19 @@ fixed, how many remain, whether any major was applied>
 |---|---|---|
 | pnpm | | |
 | projen (if used) | | |
+| projen-pipelines (if used) | | |
+| cdk-serverless (if used) | | |
+| aws-cdk-lib / aws-cdk / constructs (if used) | | |
 | <version constant, if any> | | |
 
 ## projen regeneration changes
 
 <generated files changed by the new projen version, one line each, or "none">
+
+## Generated output changes (projen libraries)
+
+<workflow, pipeline task or generated API code changes caused by projen,
+projen-pipelines or cdk-serverless upgrades, or "none" / "not used">
 
 ## Upgraded dependencies
 
@@ -90,6 +98,7 @@ required them; snapshot changes with explanation>
 | build (<command used>) | |
 | test (<command used>) | |
 | lint / type check (<command used>) | |
+| synth (<CDK apps>, if any) | |
 | <other checks the repository defines, one row each> | |
 | pnpm audit | |
 
